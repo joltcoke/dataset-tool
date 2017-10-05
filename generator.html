@@ -1,0 +1,337 @@
+<html>
+  <head>
+    <title>Dataset Flash Generator</title>
+    <style>
+      body {
+        width: 600px;
+        margin: 40px auto;
+        font-family: 'trebuchet MS', 'Lucida sans', Arial;
+        font-size: 14px;
+        color: #444;
+      }
+    
+      table {
+        *border-collapse: collapse; /* IE7 and lower */
+        border-spacing: 0;
+        width: 100%;
+      }
+      
+      .bordered {
+        border: solid #ccc 1px;
+        -moz-border-radius: 6px;
+        -webkit-border-radius: 6px;
+        border-radius: 6px;
+        -webkit-box-shadow: 0 1px 1px #ccc;
+        -moz-box-shadow: 0 1px 1px #ccc;
+        box-shadow: 0 1px 1px #ccc;
+      }
+      
+      .bordered tr:hover {
+        background: #fbf8e9;
+        -o-transition: all 0.1s ease-in-out;
+        -webkit-transition: all 0.1s ease-in-out;
+        -moz-transition: all 0.1s ease-in-out;
+        -ms-transition: all 0.1s ease-in-out;
+        transition: all 0.1s ease-in-out;
+      }
+      
+      .bordered td, .bordered th {
+        border-left: 1px solid #ccc;
+        border-top: 1px solid #ccc;
+        padding: 10px;
+        text-align: left;
+      }
+      
+      .bordered th {
+        background-color: #dce9f9;
+        background-image: -webkit-gradient(linear, left top, left bottom, from(#ebf3fc), to(#dce9f9));
+        background-image: -webkit-linear-gradient(top, #ebf3fc, #dce9f9);
+        background-image:    -moz-linear-gradient(top, #ebf3fc, #dce9f9);
+        background-image:     -ms-linear-gradient(top, #ebf3fc, #dce9f9);
+        background-image:      -o-linear-gradient(top, #ebf3fc, #dce9f9);
+        background-image:         linear-gradient(top, #ebf3fc, #dce9f9);
+        -webkit-box-shadow: 0 1px 0 rgba(255,255,255,.8) inset;
+        -moz-box-shadow:0 1px 0 rgba(255,255,255,.8) inset;
+        box-shadow: 0 1px 0 rgba(255,255,255,.8) inset;
+        border-top: none;
+        text-shadow: 0 1px 0 rgba(255,255,255,.5);
+      }
+      
+      .bordered td:first-child, .bordered th:first-child {
+        border-left: none;
+      }
+      
+      .bordered th:first-child {
+        -moz-border-radius: 6px 0 0 0;
+        -webkit-border-radius: 6px 0 0 0;
+        border-radius: 6px 0 0 0;
+      }
+      
+      .bordered th:last-child {
+        -moz-border-radius: 0 6px 0 0;
+        -webkit-border-radius: 0 6px 0 0;
+        border-radius: 0 6px 0 0;
+      }
+      
+      .bordered th:only-child{
+        -moz-border-radius: 6px 6px 0 0;
+        -webkit-border-radius: 6px 6px 0 0;
+        border-radius: 6px 6px 0 0;
+      }
+      
+      .bordered tr:last-child td:first-child {
+        -moz-border-radius: 0 0 0 6px;
+        -webkit-border-radius: 0 0 0 6px;
+        border-radius: 0 0 0 6px;
+      }
+      
+      .bordered tr:last-child td:last-child {
+        -moz-border-radius: 0 0 6px 0;
+        -webkit-border-radius: 0 0 6px 0;
+        border-radius: 0 0 6px 0;
+      }
+    </style>
+    <script>
+      function addToDataset(dataset, info) {
+        dataset.value += info;
+      }
+
+      function generateHeader(dataset, docType, ecuName, ecuOffset, dataLength, ecuLogin) {
+        if (docType == "vcp") {
+          addToDataset(dataset, "<ZDC>\n");
+          addToDataset(dataset, "<IDENT>\n");
+          addToDataset(dataset, "<DATEIID></DATEIID>\n");
+          addToDataset(dataset, "<VERSION-TYP></VERSION-TYP>\n");
+          addToDataset(dataset, "<VERSION-INHALT></VERSION-INHALT>\n");
+          addToDataset(dataset, "<LOGIN>" + ecuLogin + "</LOGIN>\n");
+          addToDataset(dataset, "<ALFID>24</ALFID>\n");
+          addToDataset(dataset, "<PRNRREF></PRNRREF>\n");
+          addToDataset(dataset, "</IDENT>\n");
+          addToDataset(dataset, "<DATENBEREICHE>\n");
+          addToDataset(dataset, "<DATENBEREICH>\n");
+          addToDataset(dataset, "<DATEN-NAME>" + ecuName + "</DATEN-NAME>\n");
+          addToDataset(dataset, "<DATEN-FORMAT-NAME>DFN_HEX</DATEN-FORMAT-NAME>\n");
+          addToDataset(dataset, "<START-ADR>" + ecuOffset + "</START-ADR>\n");
+          addToDataset(dataset, "<GROESSE-DEKOMPRIMIERT>" + dataLength + "</GROESSE-DEKOMPRIMIERT>\n");
+          addToDataset(dataset, "<DATEN>");
+        } else if (docType == "odis") {
+          addToDataset(dataset, "<MESSAGE DTD=\"XMLMSG\" VERSION=\"V0.1\">\n");
+          addToDataset(dataset, "<RESULT>\n");
+          addToDataset(dataset, "<RESPONSE NAME=\"GetParametrizeData\" DTD=\"RepairHints\" VERSION=\"1.4.0.0\" ID=\"0\">\n");
+          addToDataset(dataset, "<DATA>\n");
+          addToDataset(dataset, "<PARAMETER_DATA DIAGNOSTIC_ADDRESS=\"0x65\" START_ADDRESS=\"" + ecuOffset + "\" PR_IDX=\"0\" ZDC_NAME=\"v09600047P6\" ZDC_VERSION=\"0204\" LOGIN=\"" + ecuLogin + "\" LOGIN_IND=\"\">");
+        } else {
+          addToDataset(dataset, "\n\nERROR! Unknown docType (" + docType + ")\n\n");
+        }
+      }
+
+      function generateFooter(dataset, docType) {
+        if (docType == "vcp") {
+          addToDataset(dataset, "</DATEN>\n");
+          addToDataset(dataset, "</DATENBEREICH>\n");
+          addToDataset(dataset, "</DATENBEREICHE>\n");
+          addToDataset(dataset, "</ZDC>\n");
+        } else if (docType == "odis") {
+          addToDataset(dataset, "</PARAMETER_DATA>\n");
+          addToDataset(dataset, "</DATA>\n");
+          addToDataset(dataset, "</RESPONSE>\n");
+          addToDataset(dataset, "</RESULT>\n");
+          addToDataset(dataset, "</MESSAGE>\n");
+        } else {
+          addToDataset(dataset, "\n\nERROR! Unknown docType\n\n");
+        }
+      }
+
+      function generateBody(dataset, byteStream) {
+        for (var index = 0; index < byteStream.length; index++ ) {
+          var str = byteStream[index].toString(16).toUpperCase();
+          
+          if (str.length < 2)
+            str = '0' + str;
+
+          if (index > 0)
+            addToDataset(dataset, ",0x" + str);
+          else
+            addToDataset(dataset, "0x" + str);
+        }
+      }
+    
+      function doGenerate() {
+        var dataset = document.getElementById('dataset');
+        dataset.value = "";
+    
+        var docType = document.getElementById('docType').value;
+        var flashOffset = document.getElementById('flashOffset').value;
+        var login = document.getElementById('login').value;
+				var data = document.getElementById('data');
+				
+				var arr = data.value.replace(/[^A-Fa-f0-9 ]/g, "").split(' ');
+				var arrData = new Array();
+				
+				for (var i = 0; i < arr.length; i++) {
+					if (arr[i].length == 0)
+						continue;
+					
+					arrData.push(parseInt("0x" + arr[i]));
+				}
+
+        if (docType == "binary") {
+          for (var index = 0; index < arrData.length; index++) {
+            if ((index % 16) == 0) {
+              if (index > 0)
+                addToDataset(dataset, "\n");
+              
+              var offset = index.toString(16).toUpperCase();
+              
+              while (offset.length < 4)
+                offset = '0' + offset;
+
+              addToDataset(dataset, offset + " ");
+            }
+
+            var value = arrData[index].toString(16).toUpperCase();
+
+            if (value.length < 2)
+              value = '0' + value;
+
+            addToDataset(dataset, value + " ");
+          }
+
+          return new Uint8Array(arrData);
+        } else {
+					var length = "0x" + arrData.length.toString(16).toUpperCase();
+          generateHeader(dataset, docType, "ecuName", flashOffset, length, login);
+          generateBody(dataset, arrData);
+          generateFooter(dataset, docType);
+          
+          var byteStream = new Uint8Array(dataset.value.length);
+
+          Array.prototype.forEach.call(dataset.value, function (character, index) {
+            byteStream[index] = character.charCodeAt(0);
+          });
+
+          return byteStream;
+        }
+      }
+    
+      function doGenerateDl() {
+        var content = doGenerate();
+        var blob = new Blob([content], {type: "application/octet-stream"});
+        
+        var element = window.document.createElement('a');
+        
+        if ('download' in element) {
+          var docType = document.getElementById('docType').value;
+          var ecuObj = document.getElementById('ecuModel');
+          var ecuOptions = ecuObj.options[ecuObj.selectedIndex];
+          var ecuName = ecuOptions.text;
+          var ext = (docType == "binary") ? ".bin" : ".xml";
+
+          element.href = window.URL.createObjectURL(blob);
+          element.download = ecuName + ext;
+          document.body.appendChild(element);
+          element.click();
+          document.body.removeChild(element);
+        } else {
+          var fileReader = new FileReader();
+
+          fileReader.onload = function(event) {
+            location.href = this.result;
+          };
+
+          fileReader.readAsDataURL(blob);
+        }
+      }
+		
+			function handleUpload(evt) {
+				var files = evt.target.files;
+				console.log(files);
+				
+				var reader = new FileReader();
+				
+				reader.onload = function(e) {
+					var data = document.getElementById('data');
+					data.value = "";
+
+					var byteStream = new Uint8Array(reader.result);
+
+					for (var index = 0; index < byteStream.length; index++) {
+						if (((index % 16) == 0) && (index > 0))
+							addToDataset(data, "\n");
+						
+						var value = byteStream[index].toString(16).toUpperCase();
+						
+						if (value.length < 2)
+							value = '0' + value;
+						
+						addToDataset(data, value + " ");
+					}
+				}
+				
+				reader.readAsArrayBuffer(files[0]);
+			}
+    </script>
+  </head>
+  <body>
+    <form>
+      <table class="bordered">
+        <tr>
+          <th>Settings</th>
+          <th></th>
+        </tr>
+        <tr>
+          <td>Dataset type</td>
+          <td>
+            <select id="docType" size="1">
+              <option value="vcp">VCP</option>
+              <option value="odis">ODIS</option>
+              <option value="binary">Binary</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td>Offset</td>
+          <td>
+            <input id="flashOffset">
+          </td>
+        </tr>
+        <tr>
+          <td>Login</td>
+          <td>
+            <input id="login">
+          </td>
+        </tr>
+      </table>
+			<br> <br>
+			<table class="bordered">
+				<tr>
+					<th colspan="2">Data</th>
+				</tr>
+				<tr>
+					<td colspan="2"><textarea id="data" rows="25" style="width: 100%;font-family: Courier New, Courier, monospace;"></textarea></td>
+				</tr>
+				<tr>
+					<td>Upload file</td>
+					<td>
+						<input id="uploadButton" type="file">
+					</td>
+				</tr>
+			</table>
+	    <br> <br>
+      <table class="bordered">
+        <tr>
+          <th>Dataset</th>
+        </tr>
+        <tr>
+          <td><button type="button" id="generate" onclick="doGenerate();">Generate dataset</button><button type="button" id="generate" onclick="doGenerateDl();">Generate & download dataset</button></td>
+        </tr>
+        <tr>
+          <td><textarea id="dataset" rows="25" style="width: 100%;font-family: Courier New, Courier, monospace;"></textarea></td>
+        </tr>
+      </table>
+      <script>
+				document.getElementById('uploadButton').addEventListener('change', handleUpload, false);
+      </script>
+	  </form>
+  </body>
+</html>
