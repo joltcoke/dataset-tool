@@ -119,7 +119,7 @@
           addToDataset(dataset, "<RESULT>\n");
           addToDataset(dataset, "<RESPONSE NAME=\"GetParametrizeData\" DTD=\"RepairHints\" VERSION=\"1.4.0.0\" ID=\"0\">\n");
           addToDataset(dataset, "<DATA>\n");
-          addToDataset(dataset, "<PARAMETER_DATA DIAGNOSTIC_ADDRESS=\"" + diagAddr + "\" START_ADDRESS=\"" + ecuOffset + "\" PR_IDX=\"0\" ZDC_NAME=\"v09600047P6\" ZDC_VERSION=\"0204\" LOGIN=\"" + ecuLogin + "\" LOGIN_IND=\"\">");
+          addToDataset(dataset, "<PARAMETER_DATA DIAGNOSTIC_ADDRESS=\"" + diagAddr + "\" START_ADDRESS=\"" + ecuOffset + "\" PR_IDX=\"0\" ZDC_NAME=\"" + ecuName + "\" ZDC_VERSION=\"0204\" LOGIN=\"" + ecuLogin + "\" LOGIN_IND=\"\">");
         } else {
           addToDataset(dataset, "\n\nERROR! Unknown docType (" + docType + ")\n\n");
         }
@@ -195,6 +195,7 @@
         var flashOffset = document.getElementById('flashOffset').value;
         var login = document.getElementById('login').value;
         var diagAddr = document.getElementById('diagAddr').value;
+        var datasetName = document.getElementById('datasetName').value;
 				var data = document.getElementById('data');
 				var arrData = parseHexDataString(data.value);
 
@@ -223,7 +224,7 @@
           return new Uint8Array(arrData);
         } else {
 					var length = "0x" + arrData.length.toString(16).toUpperCase();
-          generateHeader(dataset, docType, "ecuName", flashOffset, length, login, diagAddr);
+          generateHeader(dataset, docType, datasetName, flashOffset, length, login, diagAddr);
           generateBody(dataset, arrData);
           generateFooter(dataset, docType);
           
@@ -307,13 +308,41 @@
           var parser = new DOMParser();
           var xmlDoc = parser.parseFromString(reader.result, "text/xml");
 
+          var datasetName = document.getElementById('datasetName')
+          datasetName.value = getXMLNode(xmlDoc, "/MESSAGE/RESULT/RESPONSE/DATA/PARAMETER_DATA", "ZDC_NAME");
           var login = document.getElementById('login')
           login.value = getXMLNode(xmlDoc, "/MESSAGE/RESULT/RESPONSE/DATA/PARAMETER_DATA", "LOGIN");
           var diagAddr = document.getElementById('diagAddr')
           diagAddr.value = getXMLNode(xmlDoc, "/MESSAGE/RESULT/RESPONSE/DATA/PARAMETER_DATA", "DIAGNOSTIC_ADDRESS");
           var flashOffset = document.getElementById('flashOffset')
           flashOffset.value = getXMLNode(xmlDoc, "/MESSAGE/RESULT/RESPONSE/DATA/PARAMETER_DATA", "START_ADDRESS");
-          var data = getXMLNode(xmlDoc, "/MESSAGE/RESULT/RESPONSE/DATA/PARAMETER_DATA", "");
+          var data = getXMLNode(xmlDoc, "/MESSAGE/RESULT/RESPONSE/DATA/PARAMETER_DATA");
+          setData(parseHexDataString(data));
+        }
+        
+        reader.readAsText(files[0]);
+      }
+
+      function handleVCPUpload(evt) {
+        var files = evt.target.files;
+        var reader = new FileReader();
+        
+        reader.onload = function(e) {
+          var data = document.getElementById('data');
+          data.value = "";
+          
+          var parser = new DOMParser();
+          var xmlDoc = parser.parseFromString(reader.result, "text/xml");
+
+          var login = document.getElementById('datasetName')
+          datasetName.value = getXMLNode(xmlDoc, "/ZDC/DATENBEREICHE/DATENBEREICH/DATEN-NAME");
+          var login = document.getElementById('login')
+          login.value = getXMLNode(xmlDoc, "/ZDC/IDENT/LOGIN");
+          var diagAddr = document.getElementById('diagAddr')
+          diagAddr.value = "";
+          var flashOffset = document.getElementById('flashOffset')
+          flashOffset.value = getXMLNode(xmlDoc, "/ZDC/DATENBEREICHE/DATENBEREICH/START-ADR");
+          var data = getXMLNode(xmlDoc, "/ZDC/DATENBEREICHE/DATENBEREICH/DATEN");
           setData(parseHexDataString(data));
         }
         
@@ -338,6 +367,10 @@
           <td>Upload ODIS file</td>
           <td><input id="uploadODISButton" type="file"></td>
         </tr>
+        <tr>
+          <td>Upload VCP file</td>
+          <td><input id="uploadVCPButton" type="file"></td>
+        </tr>
       </table>
       <br> <br>
       <table class="bordered">
@@ -353,6 +386,12 @@
               <option value="odis">ODIS</option>
               <option value="binary">Binary</option>
             </select>
+          </td>
+        </tr>
+        <tr>
+          <td>Dataset name</td>
+          <td>
+            <input id="datasetName">
           </td>
         </tr>
         <tr>
@@ -380,7 +419,10 @@
           <th>Dataset</th>
         </tr>
         <tr>
-          <td><button type="button" id="generate" onclick="doGenerate();">Generate dataset</button><button type="button" id="generate" onclick="doGenerateDl();">Generate & download dataset</button></td>
+          <td>
+            <button type="button" id="generate" onclick="doGenerate();">Generate dataset</button>
+            <!--button type="button" id="generate" onclick="doGenerateDl();">Generate & download dataset</button-->
+          </td>
         </tr>
         <tr>
           <td><textarea id="dataset" rows="25" style="width: 100%;font-family: Courier New, Courier, monospace;"></textarea></td>
@@ -389,6 +431,7 @@
       <script>
 				document.getElementById('uploadBinaryButton').addEventListener('change', handleBinaryUpload, false);
         document.getElementById('uploadODISButton').addEventListener('change', handleODISUpload, false);
+        document.getElementById('uploadVCPButton').addEventListener('change', handleVCPUpload, false);
       </script>
 	  </form>
   </body>
